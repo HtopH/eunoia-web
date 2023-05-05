@@ -6,6 +6,11 @@ const router=createRouter({
         {
             name:"home",
             path:"/",
+            component:()=>import("../views/IndexPage.vue")
+        },
+        {
+            name:"user",
+            path:"/user",
             component:()=>import("../views/HomePage.vue")
         },
         {

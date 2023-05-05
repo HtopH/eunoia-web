@@ -38,6 +38,11 @@
     import {ref,Ref,computed,watch} from 'vue'
     import { Plus } from '@element-plus/icons-vue'
     import FileInfo from "../class/fileInfo"
+    import {useStore} from 'vuex';
+    //获取全局状态
+    const store=useStore()
+
+
     const props=defineProps({
         isShow: Boolean,
         info: FileInfo,
@@ -45,6 +50,10 @@
 
     //computed计算属性，实现联动效果，isShow改变时，dialogVisible会跟着改变
     const dialogVisible=computed(()=>props.isShow)
+
+    watch(()=>props.isShow,()=>{
+        myHeaders.value.token=store.state.token
+    })
 
     watch(()=>props.info,(newInfo)=>{
         if (newInfo)
@@ -71,17 +80,18 @@
         const _maxTime=Date.now()-24*60*60*1000*1
         return time.getTime()<=_maxTime
     }
+    const emits=defineEmits(["closeAdd"])
     const closeAdd=()=>{
-        emits("closeAdd","你好吗，我是关闭")
+        emits("closeAdd","关闭")
     }
     const save=()=>{
-        emits("closeAdd","你好吗，我是保存")
+        emits("closeAdd","保存")
     }
-    const emits=defineEmits(["closeAdd"])
+    
     
     const imageUrl = ref("")
     const myHeaders=ref<any>({
-        token:"0xe9c1b86bc0cFe9609785d5999853B598aE747bDa"
+        token:""
     })
     const handleAvatarSuccess=(
         response: any,

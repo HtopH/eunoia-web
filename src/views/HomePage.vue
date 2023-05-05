@@ -40,36 +40,49 @@
                 </template>
             </el-table-column>
         </el-table>
-        <el-pagination background layout="prev, pager, next" :total="total" @current-change="currentChange"/>
+        <el-pagination background layout="prev, pager, next" :page-size="10" :total="pageInfo.total" @current-change="currentChange"/>
     </div>
     <addVue :isShow="isShow" :info="info" @closeAdd="closeAdd"></addVue>
 </template>
 <script lang="ts" setup>
-    import { ref,onMounted } from 'vue'
+    import { ref,Ref,onMounted } from 'vue'
     import {Search} from '@element-plus/icons-vue'
     import addVue from "../components/add.vue"
     import FileInfo from "../class/fileInfo"
     import PageInfo from "../class/PageInfo"
     import { fileList } from '../http'
+    import {useStore} from 'vuex';
+    import router from '../router'
+    
+    //获取全局状态
+    const store=useStore()
 
+
+    //生命周期函数请求数据列表
     onMounted(async()=>{
         await load()
     })
-
+    //表格数据组
     const tableData = ref<any[]>([])
     const SearchVal=ref("")
-    const total=ref(100)
-    const pageInfo=ref<PageInfo>(new PageInfo())
+    //分页数据
+    const pageInfo:Ref<PageInfo>=ref<PageInfo>(new(PageInfo))
     const load=async()=>{
-       let res=await fileList(pageInfo.value)
-       tableData.value=res.data.data
-       tableData.value.forEach((val)=>{
-        val.created=new Date(val.created*1000)
-       })
+        if (store.state.token==""){
+            router.push({path:"/"})
+            alert("请先连接钱包")
+            return
+        }
+        let res=await fileList(pageInfo.value,store.state.token)
+        tableData.value=res.data.data.list
+        pageInfo.value.total=res.data.data.total
+        tableData.value.forEach((val)=>{
+            val.created=new Date(val.created*1000)
+        })
     }
-    const currentChange=(val:number)=>{
-        console.log(val);
-        
+    const currentChange=(val:string)=>{
+        pageInfo.value.page=val
+        load()
     }
     const enterSearch=()=>{
 
@@ -98,6 +111,8 @@
         console.log(message);
         
     }
+
+    
 
 </script>
 
