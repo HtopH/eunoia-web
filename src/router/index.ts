@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 const router=createRouter({
     history:createWebHistory(),
     routes:[
-        {
+        {   
             name:"home",
             path:"/",
             component:()=>import("../views/IndexPage.vue")
@@ -14,9 +14,9 @@ const router=createRouter({
             component:()=>import("../views/HomePage.vue")
         },
         {
-            name:"test",
-            path:"/test",
-            component:()=>import("../views/TestPage.vue")
+            name:"admin",
+            path:"/admin",
+            component:()=>import("../views/admin.vue")
         }
     ]
 })

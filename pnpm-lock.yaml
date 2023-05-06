@@ -6,6 +6,7 @@ specifiers:
   axios: ^1.4.0
   element-plus: ^2.3.4
   pinia: ^2.0.35
+  querystring: ^0.2.1
   sass: ^1.62.1
   typescript: ^5.0.2
   unplugin-auto-import: ^0.15.3
@@ -22,6 +23,7 @@ dependencies:
   axios: 1.4.0
   element-plus: 2.3.4_vue@3.2.47
   pinia: 2.0.35_dtjfskxukdxv24psui2m5c75zy
+  querystring: 0.2.1
   sass: 1.62.1
   vue: 3.2.47
   vue-router: 4.1.6_vue@3.2.47
@@ -2490,6 +2492,12 @@ packages:
       decode-uri-component: 0.2.2
       object-assign: 4.1.1
       strict-uri-encode: 1.1.0
+    dev: false
+
+  /querystring/0.2.1:
+    resolution: {integrity: sha512-wkvS7mL/JMugcup3/rMitHmd9ecIGd2lhFhK9N3UUQ450h66d1r3Y9nvXzQAW1Lq+wyx61k/1pfKS5KuKiyEbg==}
+    engines: {node: '>=0.4.x'}
+    deprecated: The querystring API is considered Legacy. new code should use the URLSearchParams API instead.
     dev: false
 
   /queue-microtask/1.2.3:

@@ -15,6 +15,7 @@ export default defineConfig({
       resolvers: [ElementPlusResolver()],
     }),
   ],
+  base:'./',
   server:{
     open:true,//自动打开浏览器
     host:"127.0.0.1",//站点ip
@@ -29,6 +30,7 @@ export default defineConfig({
       }
     }
   },
+  
   css:{
     preprocessorOptions:{
       scss:{

@@ -73,12 +73,16 @@
             alert("请先连接钱包")
             return
         }
-        let res=await fileList(pageInfo.value,store.state.token)
-        tableData.value=res.data.data.list
-        pageInfo.value.total=res.data.data.total
-        tableData.value.forEach((val)=>{
-            val.created=new Date(val.created*1000)
+        fileList(pageInfo.value,store.state.token).then(res=>{
+            tableData.value=res.data.list
+            pageInfo.value.total=res.data.total
+            tableData.value.forEach((val)=>{
+                val.created=new Date(val.created*1000)
+            })
+        }).catch(err=>{
+            alert(err.msg)
         })
+        
     }
     const currentChange=(val:string)=>{
         pageInfo.value.page=val
@@ -118,7 +122,7 @@
 
 <style lang="scss" srcoped>
     .container {
-        margin: 100px auto;
+        margin:20 auto;
         width: 70%;
     }
     .table{
