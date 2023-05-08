@@ -1,14 +1,9 @@
 <template>
     <el-dialog v-model="dialogVisible" :title="info?.fileHash ? '修改':'新增'" width="30%" @close="$emit('closeAdd')" draggable>
         <el-form>
-            <el-form-item label="名称" prop="name">
-            <el-input v-model="form.fileHash" />
-            </el-form-item>
-
-            <el-form-item label="时间" prop="date">
+            <!-- <el-form-item label="时间" prop="date">
                 <el-date-picker v-model="form.created" type="date" placeholder="请选择一个时间" :disableDate="disableDate"/>
-            </el-form-item>
-
+            </el-form-item> -->
             <el-form-item label="图片" prop="address">
                 <el-upload
                     class="avatar-uploader"
@@ -17,13 +12,16 @@
                     :show-file-list="false"
                     :on-success="handleAvatarSuccess"
                     :on-error="handleAvatarError"
+                    :on-remove="handleRemove"
                 >
                     <img v-if="imageUrl" :src="imageUrl" class="avatar" />
                     <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
                 </el-upload>
-
             </el-form-item>
             
+            <el-form-item v-if="form.fileHash" label="hash:" prop="fileHash">
+               {{form.fileHash}}
+            </el-form-item>
 
             <el-form-item>
                 <el-button @click="closeAdd()">Cancel</el-button>
@@ -34,22 +32,33 @@
     </el-dialog>
 
 </template>
+
 <script lang="ts" setup>
     import {ref,Ref,computed,watch} from 'vue'
     import { Plus } from '@element-plus/icons-vue'
     import FileInfo from "../class/fileInfo"
     import {useStore} from 'vuex';
+    import { createProduct } from '../http'
     //获取全局状态
     const store=useStore()
-
-
     const props=defineProps({
         isShow: Boolean,
         info: FileInfo,
     })
-
     //computed计算属性，实现联动效果，isShow改变时，dialogVisible会跟着改变
     const dialogVisible=computed(()=>props.isShow)
+    const imageUrl = ref("")
+    const myHeaders=ref<any>({
+        token:""
+    })
+
+    const form:Ref<FileInfo> =ref<FileInfo>({
+        id:0,
+        uid:0,
+        path: "",
+        fileHash: "",
+        created:""
+    })  
 
     watch(()=>props.isShow,()=>{
         myHeaders.value.token=store.state.token
@@ -68,41 +77,45 @@
             imageUrl.value=newInfo.path.toString()
         }
     })
-    const form:Ref<FileInfo> =ref<FileInfo>({
-        id:0,
-        uid:0,
-        path: "",
-        fileHash: "",
-        created:""
-    })  
-    const disableDate=(time: any)=>{
-        //最大时间，从今天开始
-        const _maxTime=Date.now()-24*60*60*1000*1
-        return time.getTime()<=_maxTime
-    }
+    
+    // const disableDate=(time: any)=>{
+    //     //最大时间，从今天开始
+    //     const _maxTime=Date.now()-24*60*60*1000*1
+    //     return time.getTime()<=_maxTime
+    // }
+    //调用父组件方法
     const emits=defineEmits(["closeAdd"])
     const closeAdd=()=>{
-        emits("closeAdd","关闭")
+        // emits("closeAdd","关闭")可传参，关闭为字符串参数
+        emits("closeAdd")
     }
     const save=()=>{
-        emits("closeAdd","保存")
+        createProduct({
+            path:form.value.path
+        }).then(res=>{
+            emits("closeAdd",res.msg)
+    }).catch(err=>{
+        alert(err.data)
+        return
+    }) 
     }
     
-    
-    const imageUrl = ref("")
-    const myHeaders=ref<any>({
-        token:""
-    })
     const handleAvatarSuccess=(
         response: any,
     ) => {
         imageUrl.value=response.data.url
+        form.value.fileHash=response.data.file_hash
+        form.value.path=response.data.save_url
     }
     const handleAvatarError=(
         response: any,
     ) => {
         console.log(response);
     }
+    const handleRemove=()=>{
+        console.log('handleRemove')
+    }
+    
 </script>
 
 

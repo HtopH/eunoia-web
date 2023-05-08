@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import {onMounted } from 'vue'
   import {useStore} from 'vuex';
-
+  import { UpdateToken } from './http'
   //生命周期函数请求数据列表
   onMounted(async()=>{
       if (typeof window.ethereum !== "undefined") {
@@ -16,6 +16,7 @@
       console.log(res, '这就是小狐狸地址')
       //保存地址
       store.commit('setToken',res[0])
+      UpdateToken()
 
     }).catch((err: any) => {
       console.log(err)

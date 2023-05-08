@@ -8,7 +8,7 @@ const store = createStore({
         },
         getters:{
                 getToken(state: { token: String }) {
-                return state.token!=""?state.token:"连接钱包"
+                        return state.token!=""?state.token:"连接钱包"
                 }
         },
         mutations: {

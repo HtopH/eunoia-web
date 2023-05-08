@@ -1,23 +1,20 @@
-import axios,{ AxiosInstance,AxiosHeaderValue,AxiosResponse } from "axios"
+import axios,{ AxiosInstance,AxiosResponse } from "axios"
 import PageInfo from "../class/PageInfo"
 import querystring from "querystring"
-export interface ResponseData {
-    code: number;
-    data?: any;
-    msg: string;
-}
+import store from "../store"
 
+//根据环境判断代理url
 let baseUrl:any=import.meta.env.DEV?'/baseUrl':''
 
 let axiosInstance:AxiosInstance = axios.create({
-    baseURL: baseUrl,
-    headers: {
+    baseURL: baseUrl,//设置baseUrl,会在请求前加入到请求路径
+    headers: { //统一设置头部
         Accept: "application/json",
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/x-www-form-urlencoded",
     },
     transformRequest: [
         function(data) {
-            //由于使用的 form-data传数据所以要格式化
+            //由于使用的 form-data传数据,所以要格式化
             data = querystring.stringify(data);
             return data;
         }
@@ -39,13 +36,14 @@ axiosInstance.interceptors.response.use(
     }
 );
 
+//刷新token
+export const UpdateToken=()=>{
+    axiosInstance.defaults.headers.common['token']=store.state.token
+}
+
 //查询用户作品列表
-export const fileList=(page:PageInfo,account:AxiosHeaderValue) => {
-    return axiosInstance.get("/api/user/fileList?page="+page.page+"&size="+page.size,{
-        headers:{
-            token:account,
-        }
-    }).then(res=>res.data);
+export const fileList=(page:PageInfo) => {
+    return axiosInstance.get("/api/user/fileList?page="+page.page+"&size="+page.size).then(res=>res.data);
 }
 
 //查询首页作品列表
@@ -61,4 +59,9 @@ export const getPerformanceLevel=(resource:String) => {
 //设置CPU
 export const setPerformance=(type:string,num:string,password:string) => {
     return axiosInstance.get("/api/blockChain/"+type+"?num="+num+"&password="+password).then(res=>res.data);
+}
+
+//创建作品
+export const createProduct=(param:any) => {
+    return axiosInstance.post("/api/user/createProduct",param).then(res=>res.data)
 }

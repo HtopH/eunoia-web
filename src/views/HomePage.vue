@@ -9,7 +9,8 @@
                 </el-input>
             </el-col>
             <el-col :span="12">
-                <el-button type="primary" @click="openAdd">add</el-button>
+                <el-button type="primary" :icon="RefreshRight" @click="Refresh"/>
+                <el-button type="primary" @click="openAdd">添加</el-button>
                 <!-- <el-button type="danger" @click="onDel">delete</el-button> -->
             </el-col>
         </el-row>
@@ -32,11 +33,17 @@
             </el-table-column>
 
             <el-table-column prop="fileHash" label="文件hash"  width="300"/>
+            <el-table-column prop="status" label="状态"  width="80"/>
             <el-table-column prop="created" label="创建时间" />
-            <el-table-column label="Operations">
+            <el-table-column label="显示设置">
                 <template #default="scope">
-                    <el-button size="small" @click="handleEdit(scope.$index,scope.row)">Edit</el-button>
-                    <el-button size="small" type="danger" @click="handleDelete(scope.$index,scope.row)">Delete</el-button> 
+                    <el-switch  v-if="scope.row.status>0"
+                        v-model="scope.row.status"
+                        style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
+                        :active-value="1"
+                        :inactive-value="2"
+                        @change="switchChange(scope.row.id,scope.row.status)"
+                    />
                 </template>
             </el-table-column>
         </el-table>
@@ -45,18 +52,14 @@
     <addVue :isShow="isShow" :info="info" @closeAdd="closeAdd"></addVue>
 </template>
 <script lang="ts" setup>
-    import { ref,Ref,onMounted } from 'vue'
+    import { ref,Ref,onMounted  } from 'vue'
     import {Search} from '@element-plus/icons-vue'
     import addVue from "../components/add.vue"
     import FileInfo from "../class/fileInfo"
     import PageInfo from "../class/PageInfo"
     import { fileList } from '../http'
-    import {useStore} from 'vuex';
     import router from '../router'
-    
-    //获取全局状态
-    const store=useStore()
-
+    import {RefreshRight} from '@element-plus/icons-vue'
 
     //生命周期函数请求数据列表
     onMounted(async()=>{
@@ -68,12 +71,7 @@
     //分页数据
     const pageInfo:Ref<PageInfo>=ref<PageInfo>(new(PageInfo))
     const load=async()=>{
-        if (store.state.token==""){
-            router.push({path:"/"})
-            alert("请先连接钱包")
-            return
-        }
-        fileList(pageInfo.value,store.state.token).then(res=>{
+        fileList(pageInfo.value).then(res=>{
             tableData.value=res.data.list
             pageInfo.value.total=res.data.total
             tableData.value.forEach((val)=>{
@@ -81,8 +79,9 @@
             })
         }).catch(err=>{
             alert(err.msg)
-        })
-        
+            router.push({path:"/"})
+            return
+        }) 
     }
     const currentChange=(val:string)=>{
         pageInfo.value.page=val
@@ -94,30 +93,32 @@
     const openAdd=()=>{
         isShow.value=true
     }
-    // const onDel=()=>{
-
-    // }
    
     const isShow=ref(false)
     const info=ref<FileInfo>(new FileInfo())
-    const handleEdit=(index:Number,row: FileInfo)=>{
-        console.log(index); 
-        info.value=row
-        isShow.value=true
+    // const handleEdit=(index:Number,row: FileInfo)=>{
+    //     console.log(index); 
+    //     info.value=row
+    //     isShow.value=true
+    // }
+    // const handleDelete=(index:Number,row: any)=>{
+    //     console.log(index,row);
+    // }
+    
+    const switchChange=(id:Number,status: Number)=>{
+        console.log(id,status);
     }
-    const handleDelete=(index:Number,row: any)=>{
-        console.log(index,row);
-    }
-
-    const closeAdd=(message: String)=>{
+    const closeAdd=()=>{
         isShow.value=false
         info.value=new FileInfo()
-        console.log(message);
-        
+        load()    
     }
-
-    
-
+    // const statusFormatter=(row:any)=>{
+    //     return row.status
+    // }
+    const Refresh=()=>{
+        load() 
+    }
 </script>
 
 <style lang="scss" srcoped>

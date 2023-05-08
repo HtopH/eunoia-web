@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <el-row v-for="(item) in tableData" :key="item.id" >
+        <el-row v-for="(item) in tableData" :key="item.id">
             <el-col :span="7">
                 <el-card :body-style="{ padding: '0px' }">
                     <img :src=item.path class="image"/>
@@ -12,7 +12,7 @@
                         </div>
                     </div>
                 </el-card>
-            </el-col>
+            </el-col> 
         </el-row>
         <el-pagination background layout="prev, pager, next" :page-size="10" :total="pageInfo.total" @current-change="currentChange"/>
     </div>
