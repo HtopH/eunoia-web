@@ -5,8 +5,13 @@ const router=createRouter({
     routes:[
         {   
             name:"home",
-            path:"/",
+            path:"/dist",
             component:()=>import("../views/IndexPage.vue")
+        },
+        {   
+            name:"product",
+            path:"/product",
+            component:()=>import("../views/ProductView.vue")
         },
         {
             name:"user",
@@ -17,6 +22,11 @@ const router=createRouter({
             name:"admin",
             path:"/admin",
             component:()=>import("../views/admin.vue")
+        },
+        {
+            name:"node",
+            path:"/node",
+            component:()=>import("../views/NodePage.vue")
         }
     ]
 })

@@ -3,7 +3,9 @@ import { createStore } from 'vuex'
 const store = createStore({
         state () {
                 return {
-                        token: ""
+                        token: "",
+                        chainHttp:"http://121.8.169.179:211",
+                        eunoiaContract:"0x46FB1429DA5484e2C4Cd58966227AB018Bb196c6",
                 }
         },
         getters:{

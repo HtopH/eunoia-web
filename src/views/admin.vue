@@ -1,4 +1,7 @@
 <template>
+    <div class="table-page">
+
+    </div>
     <el-form :model="form" label-width="120px" class="container">
       <el-form-item label="操作等级">
         <el-input v-model="form.num" type="number"/>
@@ -53,7 +56,9 @@
   }
   </script>
 <style>
-
+.table-page {
+  padding: 20px;
+}
 .container {
         margin:0 auto;
         width: 70%;

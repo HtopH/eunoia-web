@@ -1,7 +1,9 @@
 export default class User {
-    id:Number=0
-    uid: Number=0
-    path: String=""
-    fileHash: String=""
-    created: String=""
+    id:number=0
+    uid: number=0
+    path: string=""
+    price:number=0
+    fileHash: string=""
+    created: string=""
+    status:number=0
 }

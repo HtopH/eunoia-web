@@ -4,10 +4,13 @@
             <!-- <el-form-item label="时间" prop="date">
                 <el-date-picker v-model="form.created" type="date" placeholder="请选择一个时间" :disableDate="disableDate"/>
             </el-form-item> -->
-            <el-form-item label="图片" prop="address">
+            <el-form-item v-if="info?.path" label="图片" prop="address">
+                <img  :src="imageUrl" class="avatar" />
+            </el-form-item>
+            <el-form-item v-else label="图片" prop="address">
                 <el-upload
                     class="avatar-uploader"
-                    action="http://127.0.0.1:10223/api/user/upload"
+                    :action="uploadUrl"
                     :headers="myHeaders"
                     :show-file-list="false"
                     :on-success="handleAvatarSuccess"
@@ -19,13 +22,18 @@
                 </el-upload>
             </el-form-item>
             
-            <el-form-item v-if="form.fileHash" label="hash:" prop="fileHash">
-               {{form.fileHash}}
+            <el-form-item label="价格" prop="price">
+                <el-input-number v-model="form.price" :precision="2" :step="0.1" :max="10" />
+            </el-form-item>
+            
+            <el-form-item v-if="form.fileHash" label="hash" prop="fileHash">
+                <el-input v-model="form.fileHash" disabled/>
             </el-form-item>
 
             <el-form-item>
-                <el-button @click="closeAdd()">Cancel</el-button>
-                <el-button type="primary" @click="save()">Add</el-button>
+                <el-button v-if="info?.path" type="primary" @click="edit()">编辑</el-button>
+                <el-button v-else type="primary" @click="save()">添加</el-button>
+                <el-button @click="closeAdd()">取消</el-button>
             </el-form-item>
 
         </el-form>
@@ -38,9 +46,30 @@
     import { Plus } from '@element-plus/icons-vue'
     import FileInfo from "../class/fileInfo"
     import {useStore} from 'vuex';
-    import { createProduct } from '../http'
+    import { RequstUrl,createProduct } from '../http'
+    import Web3 from "web3";
+    import eunoiaAbiJson from "../assets/json/eunoiaAbi.json"
+    import BigNumber from 'bignumber.js'
+    
+    const uploadUrl=ref<string>(RequstUrl+'/api/user/upload')
     //获取全局状态
     const store=useStore()
+    //区块链相关
+    const web3=ref<any>(new Web3(window.ethereum))
+    const eunoiaAbi=eunoiaAbiJson
+    const eunoiaContract=new web3.value.eth.Contract(eunoiaAbi,store.state.eunoiaContract)
+    const checkToken=()=>{
+        if (store.state.token=="" || typeof window.ethereum == "undefined"){
+            return false
+        }
+        return true
+    }
+    const checkChainProduct=(hash:String)=>{
+        console.log("checkChainProduct",hash);
+        return true
+    }
+
+
     const props=defineProps({
         isShow: Boolean,
         info: FileInfo,
@@ -56,8 +85,10 @@
         id:0,
         uid:0,
         path: "",
+        price:0,
         fileHash: "",
-        created:""
+        created:"",
+        status:0
     })  
 
     watch(()=>props.isShow,()=>{
@@ -71,8 +102,10 @@
                 id:newInfo.id,
                 uid:newInfo.uid,
                 path:newInfo.path,
+                price:newInfo.price,
                 fileHash:newInfo.fileHash,
-                created:newInfo.created
+                created:newInfo.created,
+                status:newInfo.status
             }
             imageUrl.value=newInfo.path.toString()
         }
@@ -89,15 +122,70 @@
         // emits("closeAdd","关闭")可传参，关闭为字符串参数
         emits("closeAdd")
     }
-    const save=()=>{
+    const save=async()=>{
+        productToChain()
         createProduct({
-            path:form.value.path
+            path:form.value.path,
+            price:form.value.price
         }).then(res=>{
             emits("closeAdd",res.msg)
-    }).catch(err=>{
-        alert(err.data)
-        return
-    }) 
+        }).catch(err=>{  
+            alert(err.data)
+            return
+        }) 
+    }
+
+    const edit=async()=>{
+        if (props.info?.price!=form.value.price){
+            await updateToChain()
+            // editProduct({
+            //     "id":props.info?.id,
+            //     "status":props.info?.status,
+            //     "price":form.value.price
+            // }).then(res=>{
+            //     console.log(res); 
+            // }).catch(err=>{
+            //     alert(err.msg)
+            //     return
+            // }) 
+        }
+        emits("closeAdd")
+    }
+    //作品上链
+    const productToChain=async()=>{
+        if (!checkToken() || !checkChainProduct(form.value.fileHash)){
+            alert("请安装钱包或连接钱包")
+            return
+        }
+        let pay = ref(new BigNumber(form.value.price).times(new BigNumber(10).pow(18)).toString())
+        console.log(form.value.fileHash,pay.value);
+        await eunoiaContract.methods.createProduct(form.value.fileHash,pay.value).send({
+            from:store.state.token
+        }).on('trasactionHash',(hash:string)=>{
+            console.log("Transaction hash:",hash);
+        }).on('receipt',(receipt:any)=>{
+            console.log("receipt",receipt);
+        }).on('error',(error:Error)=>{
+            console.log("error",error);
+        })
+    }
+
+    const updateToChain=async()=>{
+        if (!checkToken() || !checkChainProduct(form.value.fileHash)){
+            alert("请安装钱包或连接钱包")
+            return
+        }
+        let pay = ref(new BigNumber(form.value.price).times(new BigNumber(10).pow(18)).toString())
+        console.log(form.value.fileHash,pay.value);
+        await eunoiaContract.methods.editProduct(form.value.fileHash,pay.value).send({
+            from:store.state.token
+        }).on('trasactionHash',(hash:string)=>{
+            console.log("Transaction hash:",hash);
+        }).on('receipt',(receipt:any)=>{
+            console.log("receipt",receipt);
+        }).on('error',(error:Error)=>{
+            console.log("error",error);
+        })
     }
     
     const handleAvatarSuccess=(
